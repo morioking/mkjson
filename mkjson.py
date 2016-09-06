@@ -9,6 +9,8 @@ import random
 import math
 import datetime
 import ConfigParser
+import os.path
+
 
 class DataClass:
 	def __init__(self):
@@ -159,12 +161,14 @@ class DataClass:
 
 
 class JsonDataClass(DataClass):
-	def __init__(self, file):
+	def __init__(self):
 		DataClass.__init__(self)
+		
+	def set_json(self, file):
 		f = open(file, "r")
 		DataClass.set_data(self, json.load(f))
 		f.close()
-		
+
 	def reset(self):
 		DataClass.set_data(self, {"nodes": [],"edges": []})
 
@@ -296,8 +300,15 @@ if __name__ == "__main__":
 
 	inifile = ConfigParser.SafeConfigParser()
 	inifile.read("./config.ini")
-	# data = JsonDataClass("data.json")
-	data = JsonDataClass(inifile.get("settings","file"))
+	jsonfile = inifile.get("settings","file")
+	if os.path.isfile(jsonfile):
+		data = JsonDataClass()
+		data.set_json(jsonfile)
+	else:
+		data = JsonDataClass()
+		data.reset()
+
+	today = datetime.date.today().isoformat()
 
 	while 1:
 		print "type command..."
@@ -370,25 +381,23 @@ if __name__ == "__main__":
 				id = m3u8.get_new_node_id(i)
 				label = m3u8.get_node_label_with_id(id)
 				color = "rgb("+str(random.randint(0,255))+","+str(random.randint(0,255))+","+str(random.randint(0,255))+")"
-				today = datetime.date.today().isoformat()
 				data.create_new_node(color, label, posy, posx, id, size, today)
 
 			for i in range(m3u8.get_old_node_ids_count()):
 				print "old node id", m3u8.get_old_node_id(i)
 				data.set_node_size_with_id(m3u8.get_old_node_id(i), data.get_node_size_with_id(m3u8.get_old_node_id(i)) + 1)
-				data.set_node_update_date_with_id(m3u8.get_old_node_id(i), datetime.date.today().isoformat())
+				data.set_node_update_date_with_id(m3u8.get_old_node_id(i), today)
 
 			for i in range(m3u8.get_new_edge_ids_count()):
 				color = "rgb(128, 128, 128)"
-				today = datetime.date.today().isoformat()
 				data.create_new_edge(color, m3u8.get_edge_source(i), m3u8.get_new_edge_id(i), m3u8.get_edge_target(i), today)
 
 			for i in range(m3u8.get_old_edge_ids_count()):
-				data.set_edge_update_date_with_id(m3u8.get_old_node_id(i), datetime.date.today().isoformat())
+				data.set_edge_update_date_with_id(m3u8.get_old_node_id(i), today)
 
 			data.show()
 		elif input_line == "commit":
-			f = open ("data.json", "w")
+			f = open (jsonfile, "w")
 			json.dump(data.get_data(), f)
 			f.close()
 			print "commit data.json"
