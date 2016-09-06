@@ -7,6 +7,7 @@ import re
 import copy
 import random
 import math
+import datetime
 
 class DataClass:
 	def __init__(self):
@@ -82,11 +83,17 @@ class DataClass:
 	def set_node_id(self, i, id):
 		self.__data["nodes"][i]["id"] = id
 
-	def create_new_node(self, color, label, y, x, id, size):
-		self.__data["nodes"].append({"color":color, "label":label, "y":y, "x":x, "id":id, "size":size})
+	def set_node_entry_date(self, i, day):
+		self.__data["nodes"][i]["entry"] = day
 		
-	def create_new_edge(self, color, source, id, target):
-		self.__data["edges"].append({"color":color, "source":source, "id":id, "target":target})
+	def set_node_update_date(self, i, day):
+		self.__data["nodes"][i]["update"] = day
+		
+	def create_new_node(self, color, label, y, x, id, size, day):
+		self.__data["nodes"].append({"color":color, "label":label, "y":y, "x":x, "id":id, "size":size, "entry":day, "update":day})
+		
+	def create_new_edge(self, color, source, id, target, day):
+		self.__data["edges"].append({"color":color, "source":source, "id":id, "target":target, "entry":day, "update":day})
 
 	def get_edge_id_with_source_target(self, source, target):
 		id = "none"
@@ -143,12 +150,17 @@ class DataClass:
 	def del_edge_with_id(self, id):
 		self.del_edge(self.get_edge_index_with_id(id))
 
+
 class JsonDataClass(DataClass):
 	def __init__(self, file):
 		DataClass.__init__(self)
 		f = open(file, "r")
 		DataClass.set_data(self, json.load(f))
 		f.close()
+		
+	def reset(self):
+		DataClass.set_data(self, {"nodes": [],"edges": []})
+
 		
 class M3u8DataClass(DataClass):
 	def __init__(self):
@@ -304,7 +316,7 @@ if __name__ == "__main__":
 			m3u8.load_m3u8(input_file)
 			for i in range(m3u8.get_m3u8_labels_count()):
 				print m3u8.get_m3u8_label(i)
-				m3u8.create_new_node("rgb(255,204,102)", m3u8.get_m3u8_label(i), 0, 0, "", 1)
+				m3u8.create_new_node("rgb(255,204,102)", m3u8.get_m3u8_label(i), 0, 0, "", 1, "")
 
 			# update node id for m3u8 data
 			new_node_id_number = data.get_nodes_count()
@@ -322,7 +334,7 @@ if __name__ == "__main__":
 			for i in range(m3u8.get_nodes_count()-1):
 				source = m3u8.get_node_id(i)
 				target = m3u8.get_node_id(i + 1)
-				m3u8.create_new_edge("rgb(128, 128, 128)", source, "", target)
+				m3u8.create_new_edge("rgb(128, 128, 128)", source, "", target, "")
 
 			# update edge id for m3u8
 			new_edge_id_number = data.get_edges_count()
@@ -349,7 +361,8 @@ if __name__ == "__main__":
 				id = m3u8.get_new_node_id(i)
 				label = m3u8.get_node_label_with_id(id)
 				color = "rgb("+str(random.randint(0,255))+","+str(random.randint(0,255))+","+str(random.randint(0,255))+")"
-				data.create_new_node(color, label, posy, posx, id, size)
+				today = datetime.date.today().isoformat()
+				data.create_new_node(color, label, posy, posx, id, size, today)
 
 			for i in range(m3u8.get_old_node_ids_count()):
 				print "old node id", m3u8.get_old_node_id(i)
@@ -357,7 +370,8 @@ if __name__ == "__main__":
 
 			for i in range(m3u8.get_new_edge_ids_count()):
 				color = "rgb(128, 128, 128)"
-				data.create_new_edge(color, m3u8.get_edge_source(i), m3u8.get_new_edge_id(i), m3u8.get_edge_target(i))
+				today = datetime.date.today().isoformat()
+				data.create_new_edge(color, m3u8.get_edge_source(i), m3u8.get_new_edge_id(i), m3u8.get_edge_target(i), today)
 
 			for i in range(m3u8.get_old_edge_ids_count()):
 				pass
@@ -373,27 +387,11 @@ if __name__ == "__main__":
 			id = raw_input()
 			data.del_edge_with_id(id)
 			data.show()
+		elif input_line == "reset":
+			data.reset()
 		elif input_line == "show":
 			data.show()
-		elif input_line == "shuffle":
-			for i in range(data.get_nodes_count()):
-				data.set_node_x(i, random.uniform(-1,1))
-				data.set_node_y(i, random.uniform(-1,1))
-		elif input_line == "circle":
-			for i in range(data.get_nodes_count()):
-				data.set_node_x(i, math.cos((2 * math.pi * i)/data.get_nodes_count()))
-				data.set_node_y(i, math.sin((2 * math.pi * i)/data.get_nodes_count()))
-		elif input_line == "testpos":
-			x = random.uniform(-1,1)
-			y = random.uniform(-1,1)
-			for i in range(data.get_nodes_count()):
-				rad = random.uniform(0, 2 * math.pi)
-				x = x + 0.3 * math.cos(rad)
-				y = y + 0.3 * math.sin(rad)
-				data.set_node_x(i, x)
-				data.set_node_y(i, y) 
-		elif input_line == "init":
-			pass
+			print datetime.date.today().isoformat()
 		else:
 			print "again"
 
