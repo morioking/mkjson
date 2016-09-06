@@ -8,6 +8,7 @@ import copy
 import random
 import math
 import datetime
+import ConfigParser
 
 class DataClass:
 	def __init__(self):
@@ -293,8 +294,10 @@ def mixplaylist(pl1, pl2, outpl):
 
 if __name__ == "__main__":
 
-	# load json data
-	data = JsonDataClass("data.json")
+	inifile = ConfigParser.SafeConfigParser()
+	inifile.read("./config.ini")
+	# data = JsonDataClass("data.json")
+	data = JsonDataClass(inifile.get("settings","file"))
 
 	while 1:
 		print "type command..."
