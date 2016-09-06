@@ -82,12 +82,12 @@ class DataClass:
 
 	def set_node_id(self, i, id):
 		self.__data["nodes"][i]["id"] = id
-
-	def set_node_entry_date(self, i, day):
-		self.__data["nodes"][i]["entry"] = day
 		
 	def set_node_update_date(self, i, day):
 		self.__data["nodes"][i]["update"] = day
+		
+	def set_node_update_date_with_id(self, id, day):
+		self.set_node_update_date(self.get_node_index_with_id(id), day)
 		
 	def create_new_node(self, color, label, y, x, id, size, day):
 		self.__data["nodes"].append({"color":color, "label":label, "y":y, "x":x, "id":id, "size":size, "entry":day, "update":day})
@@ -143,6 +143,12 @@ class DataClass:
 	
 	def set_edge_target_with_id(self, id, target):
 		self.set_edge_target(self.get_edge_index_with_id(id), target)
+		
+	def set_edge_update_date(self, i, day):
+		self.__data["edges"][i]["update"] = day
+		
+	def set_edge_update_date_with_id(self, id, day):
+		self.set_edge_update_date(self.get_edge_index_with_id(id), day)
 		
 	def del_edge(self, i):
 		self.__data["edges"].pop(i)
@@ -367,6 +373,7 @@ if __name__ == "__main__":
 			for i in range(m3u8.get_old_node_ids_count()):
 				print "old node id", m3u8.get_old_node_id(i)
 				data.set_node_size_with_id(m3u8.get_old_node_id(i), data.get_node_size_with_id(m3u8.get_old_node_id(i)) + 1)
+				data.set_node_update_date_with_id(m3u8.get_old_node_id(i), datetime.date.today().isoformat())
 
 			for i in range(m3u8.get_new_edge_ids_count()):
 				color = "rgb(128, 128, 128)"
@@ -374,7 +381,8 @@ if __name__ == "__main__":
 				data.create_new_edge(color, m3u8.get_edge_source(i), m3u8.get_new_edge_id(i), m3u8.get_edge_target(i), today)
 
 			for i in range(m3u8.get_old_edge_ids_count()):
-				pass
+				data.set_edge_update_date_with_id(m3u8.get_old_node_id(i), datetime.date.today().isoformat())
+
 			data.show()
 		elif input_line == "commit":
 			f = open ("data.json", "w")
