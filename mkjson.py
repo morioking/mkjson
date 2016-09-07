@@ -184,16 +184,12 @@ class M3u8DataClass(DataClass):
 		self.__labels = []
 		
 	def load_m3u8(self, file):
-		print "loading",file, "..."
 		f = open(file, "r")
-		#self.__data = {"nodes":[], "edges":[]}
 		for line in f:
 			if re.match("#EXTINF",line):
 				label = re.sub("#EXTINF(.[0-9]{3,4}[,])","",line).strip()
 				self.__labels.append(label)
 		f.close()
-
-		print "finish loading!"
 		
 	def get_m3u8_label(self, i):
 		return self.__labels[i]
@@ -392,8 +388,44 @@ if __name__ == "__main__":
 			for i in range(m3u8.get_old_edge_ids_count()):
 				data.set_edge_update_date_with_id(m3u8.get_old_node_id(i), today)
 				
-			print "new node = ", m3u8.get_new_node_ids_count()
-			
+			# report how many are new nodes, old nodes, new edges and old edges. Then its detail...
+			print "+++++++++++++++++++++++++++++++++++++++" 
+			print "summery report"
+			print "+++++++++++++++++++++++++++++++++++++++" 
+			print "node:"
+			print "  new:", m3u8.get_new_node_ids_count()
+			print "  old:", m3u8.get_old_node_ids_count()
+			print "edge:"
+			print "  new:", m3u8.get_new_edge_ids_count()
+			print "  old:", m3u8.get_old_edge_ids_count() 
+			print ""
+			print "+++++++++++++++++++++++++++++++++++++++" 
+			print "detail report"
+			print "+++++++++++++++++++++++++++++++++++++++" 
+			if m3u8.get_new_node_ids_count() != 0:
+				print m3u8.get_new_node_ids_count(), "new node:"
+				for i in range(m3u8.get_new_node_ids_count()):
+					print "    ",data.get_node_label_with_id(m3u8.get_new_node_id(i))
+
+			if m3u8.get_old_node_ids_count() != 0:
+				print m3u8.get_old_node_ids_count(), "old node:"
+				for i in range(m3u8.get_old_node_ids_count()):
+					print "  ",data.get_node_label_with_id(m3u8.get_old_node_id(i))
+
+			print "  "
+
+			if m3u8.get_new_edge_ids_count() != 0:
+				print m3u8.get_new_edge_ids_count(), "new edge:"
+				for i in range(m3u8.get_new_edge_ids_count()):
+					print "  ",m3u8.get_new_edge_id(i)
+
+			if m3u8.get_old_edge_ids_count() != 0:
+				print m3u8.get_old_edge_ids_count(), "old edge:"
+				for i in range(m3u8.get_old_edge_ids_count()):
+					print "  ",m3u8.get_old_edge_id(i)	
+
+			print "  "
+
 			while 1:
 				print "overwrite json.data? (Y/N)"
 				print "    ->",
