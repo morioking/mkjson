@@ -276,9 +276,6 @@ def mixplaylist(pl1, pl2, outpl):
 
 	list_outpl.insert(0, header)
 
-	# tdatetime = dt.now()
-	# tstr = tdatetime.strftime('%Y-%m-%d')
-	# file3 = "MIXED HISTORY_"+tstr+".m3u8"
 	file3 = outpl
 	f = open(file3, "w")
 	for line in list_outpl:
@@ -292,6 +289,11 @@ def mixplaylist(pl1, pl2, outpl):
 
 
 if __name__ == "__main__":
+	print ""
+	print "+++++++++++++++++++++++++++++++++++++++" 
+	print "+              mkjson                 +"
+	print "+++++++++++++++++++++++++++++++++++++++" 
+	print ""
 
 	inifile = ConfigParser.SafeConfigParser()
 	inifile.read("./config.ini")
@@ -306,7 +308,7 @@ if __name__ == "__main__":
 	today = datetime.date.today().isoformat()
 
 	while 1:
-		print "type command..."
+		print "type command (mixpl/import/show/exit)"
 		print "    ->",
 		input_line = raw_input()
 		if input_line == "exit":
@@ -327,11 +329,13 @@ if __name__ == "__main__":
 		elif input_line == "import":
 			# sequence diagram
 			# https://creately.com/diagram/isi7szk61/ZdBFzRm5MscjkiipVY4ee11xM%3D
+			
+			# load m3u8 playlist to object
 			print ""
 			print "type m3u8 format playlist"
 			print "    ->",
 			input_file = raw_input()
-			#input_file = "test.m3u8"
+			# input_file = "test.m3u8"
 			m3u8 = M3u8DataClass()
 			m3u8.load_m3u8(input_file)
 			for i in range(m3u8.get_m3u8_labels_count()):
@@ -368,6 +372,7 @@ if __name__ == "__main__":
 					m3u8.append_old_edge_id(m3u8.get_edge_id(i))
 
 			# set m3u8 -> data object
+			# set new nodes
 			for i in range(m3u8.get_new_node_ids_count()):
 				posx = random.uniform(-1,1)
 				posy = random.uniform(-1,1)
@@ -377,14 +382,17 @@ if __name__ == "__main__":
 				color = "rgb("+str(random.randint(0,255))+","+str(random.randint(0,255))+","+str(random.randint(0,255))+")"
 				data.create_new_node(color, label, posy, posx, id, size, today)
 
+			# set old nodes
 			for i in range(m3u8.get_old_node_ids_count()):
 				data.set_node_size_with_id(m3u8.get_old_node_id(i), data.get_node_size_with_id(m3u8.get_old_node_id(i)) + 1)
 				data.set_node_update_date_with_id(m3u8.get_old_node_id(i), today)
 
+			# set new edges
 			for i in range(m3u8.get_new_edge_ids_count()):
 				color = "rgb(128, 128, 128)"
 				data.create_new_edge(color, m3u8.get_edge_source(i), m3u8.get_new_edge_id(i), m3u8.get_edge_target(i), today)
 
+			# set old edges
 			for i in range(m3u8.get_old_edge_ids_count()):
 				data.set_edge_update_date_with_id(m3u8.get_old_node_id(i), today)
 				
@@ -426,6 +434,7 @@ if __name__ == "__main__":
 
 			print "  "
 
+			# overwrite data.json if you said YES
 			while 1:
 				print "overwrite json.data? (Y/N)"
 				print "    ->",
@@ -443,13 +452,12 @@ if __name__ == "__main__":
 				else:
 					print "typo! type again..."
 			break
+
 		elif input_line == "del":
 			print "type edges index"
 			id = raw_input()
 			data.del_edge_with_id(id)
 			data.show()
-		elif input_line == "reset":
-			data.reset()
 		elif input_line == "show":
 			data.show()
 		else:
